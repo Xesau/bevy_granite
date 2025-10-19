@@ -200,7 +200,7 @@ pub fn collect_components_system(
                         spawn_source_clone
                     );
 
-                    world.send_event(RuntimeDataReadyEvent(spawn_source_clone.to_string()));
+                    world.write_message(RuntimeDataReadyEvent(spawn_source_clone.to_string()));
                 }
             }
         });
