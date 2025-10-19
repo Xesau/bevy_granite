@@ -1,6 +1,6 @@
 use bevy_granite_logging::{log, LogCategory, LogLevel, LogType};
 use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, ops::Deref, str::FromStr};
+use std::{cmp::Ordering, str::FromStr};
 
 #[derive(Deserialize, Debug)]
 struct FileVersionConfig {

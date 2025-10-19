@@ -1,5 +1,5 @@
 use crate::entities::SaveSettings;
-use bevy::{ecs::message::Message, prelude::Event, transform::components::Transform};
+use bevy::{ecs::message::Message, transform::components::Transform};
 
 #[derive(Message)]
 pub struct RuntimeDataReadyEvent(pub String);

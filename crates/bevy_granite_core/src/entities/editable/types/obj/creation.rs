@@ -5,7 +5,7 @@ use crate::{
     IdentityData, MaterialNameSource, NeedsTangents, PromptData, PromptImportSettings,
 };
 use bevy::{
-    asset::{AssetPath, AssetServer, Assets, Handle},
+    asset::{AssetServer, Assets, Handle},
     ecs::{
         bundle::Bundle,
         entity::Entity,

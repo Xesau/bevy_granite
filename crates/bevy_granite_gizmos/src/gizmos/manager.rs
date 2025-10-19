@@ -1,7 +1,7 @@
 use super::{
     despawn_rotate_gizmo, despawn_transform_gizmo, spawn_rotate_gizmo, spawn_transform_gizmo,
     DespawnGizmoEvent, GizmoType, LastSelectedGizmo, NewGizmoConfig, RotateGizmo,
-    RotateGizmoParent, SpawnGizmoEvent, TransformGizmo, TransformGizmoParent,
+    RotateGizmoParent, SpawnGizmoEvent, TransformGizmoParent,
 };
 use crate::{gizmos::NewGizmoType, selection::ActiveSelection};
 use bevy::prelude::{

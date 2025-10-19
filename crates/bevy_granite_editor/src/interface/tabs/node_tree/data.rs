@@ -1,6 +1,6 @@
 use bevy::{
     ecs::message::Message,
-    prelude::{Entity, Event},
+    prelude::Entity,
 };
 
 /// Pending actions from context menus to be processed by the system

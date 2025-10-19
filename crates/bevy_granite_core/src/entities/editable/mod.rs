@@ -3,7 +3,7 @@ use crate::{
     RequiredMaterialDataMut,
 };
 use bevy::{
-    asset::{AssetId, AssetServer, Assets, Handle},
+    asset::{AssetServer, Assets, Handle},
     ecs::{
         entity::Entity,
         system::{Commands, Res, ResMut},

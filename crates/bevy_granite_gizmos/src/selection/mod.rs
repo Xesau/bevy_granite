@@ -1,5 +1,5 @@
 use bevy::ecs::{
-    component::Component, lifecycle::HookContext, message::Messages, world::DeferredWorld,
+    component::Component, lifecycle::HookContext, world::DeferredWorld,
 };
 
 pub mod duplicate;

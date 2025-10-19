@@ -9,11 +9,7 @@ use crate::{
             bottom_panel::{BottomDockState, BottomTab}, right_panel::{SideDockState, SideTab}, BottomTabType, SideTabType
         },
         popups::PopupType,
-        tabs::{
-            debug::ui::DebugTabData, log::LogTabData, EditorSettingsTabData, EntityEditorTabData,
-            EventsTabData,
-        },
-        EditorEvents, NodeTreeTabData,
+        EditorEvents,
     },
     viewport::ViewportCameraState,
     UI_CONFIG,
