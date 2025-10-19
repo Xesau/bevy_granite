@@ -150,11 +150,11 @@ impl GraniteType for RectBrush {
         self.edit_via_ui(ui, spacing)
     }
 
-    fn get_material_data(&self) -> Option<RequiredMaterialData> {
+    fn get_material_data<'a>(&'a self) -> Option<RequiredMaterialData<'a>> {
         Some(self.material.as_ref())
     }
 
-    fn get_mut_material_data(&mut self) -> Option<RequiredMaterialDataMut> {
+    fn get_mut_material_data<'a>(&'a mut self) -> Option<RequiredMaterialDataMut<'a>> {
         Some(self.material.as_mut())
     }
 

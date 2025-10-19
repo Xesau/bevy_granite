@@ -152,13 +152,13 @@ pub trait GraniteType {
 
     /// Get this class's required material data
     /// Current Material, Last Material and Path
-    fn get_material_data(&self) -> Option<RequiredMaterialData> {
+    fn get_material_data<'a>(&'a self) -> Option<RequiredMaterialData<'a>> {
         None
     }
 
     /// Get this class's required material data as mutable
     /// Current Material, Last Material and Path. We use path as a request basically
-    fn get_mut_material_data(&mut self) -> Option<RequiredMaterialDataMut> {
+    fn get_mut_material_data<'a>(&'a mut self) -> Option<RequiredMaterialDataMut<'a>> {
         None
     }
 

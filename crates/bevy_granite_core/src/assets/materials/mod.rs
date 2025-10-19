@@ -29,7 +29,7 @@ impl MaterialData {
         }
     }
 
-    pub fn as_ref(&self) -> RequiredMaterialData {
+    pub fn as_ref<'a>(&'a self) -> RequiredMaterialData<'a> {
         RequiredMaterialData {
             current: &self.current,
             last: &self.last,
@@ -37,7 +37,7 @@ impl MaterialData {
         }
     }
 
-    pub fn as_mut(&mut self) -> RequiredMaterialDataMut {
+    pub fn as_mut<'a>(&'a mut self) -> RequiredMaterialDataMut<'a> {
         RequiredMaterialDataMut {
             current: &mut self.current,
             last: &mut self.last,
