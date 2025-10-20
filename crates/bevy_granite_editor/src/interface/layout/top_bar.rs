@@ -14,14 +14,15 @@ use crate::{
     viewport::ViewportCameraState,
     UI_CONFIG,
 };
-use bevy::{ecs::{entity::Entity, system::Commands}, prelude::ResMut};
-use bevy_egui::egui;
+use bevy::{ecs::{entity::Entity, system::Commands}, prelude::{Query, ResMut, With}};
+use bevy_egui::egui::{self, Button, Widget};
 use bevy_granite_core::{
     absolute_asset_to_rel, entities::SaveSettings, RequestDespawnBySource,
     RequestDespawnSerializableEntities, RequestLoadEvent, RequestSaveEvent, UserInput,
 };
 use bevy_granite_gizmos::selection::events::EntityEvents;
 use native_dialog::FileDialog;
+use bevy_granite_gizmos::selection::Selected;
 
 pub fn top_bar_ui(
     side_dock: &mut ResMut<SideDockState>,
@@ -33,6 +34,7 @@ pub fn top_bar_ui(
     commands: &mut Commands,
     camera_options: &[(Entity, String)],
     viewport_camera_state: &ViewportCameraState,
+    selection_query: &Query<Entity, With<Selected>>,
 ) {
     let active_camera_label = if viewport_camera_state.is_using_editor() {
         "Editor Camera".to_string()
@@ -52,7 +54,10 @@ pub fn top_bar_ui(
         // MENUs
         ui.horizontal(|ui| {
             ui.menu_button("File", |ui| {
-                if ui.button("Save as").clicked() {
+                ui.set_min_width(150.0);
+
+                let save_as_button = Button::new("Save as").shortcut_text("Ctrl + Shift + S").ui(ui);
+                if save_as_button.clicked() {
                     if let Some(path) = FileDialog::new()
                         .add_filter("Granite Scene", &["scene"])
                         .show_save_single_file()
@@ -65,7 +70,8 @@ pub fn top_bar_ui(
                     ui.close();
                 }
 
-                if ui.button("Save (Ctrl + S)").clicked() {
+                let save_button = Button::new("Save").shortcut_text("Ctrl + S").ui(ui);
+                if save_button.clicked() {
                     let loaded = &editor_state.loaded_sources;
                     if !loaded.is_empty() {
                         for source in loaded.iter() {
@@ -75,7 +81,8 @@ pub fn top_bar_ui(
                     ui.close();
                 }
 
-                if ui.button("Open (Ctrl + O)").clicked() {
+                let open_button = Button::new("Open").shortcut_text("Ctrl + O").ui(ui);
+                if open_button.clicked() {
                     if let Some(path) = FileDialog::new()
                         .add_filter("Granite Scene", &["scene"])
                         .show_open_single_file()
@@ -93,7 +100,8 @@ pub fn top_bar_ui(
                 ui.separator();
 
                 ui.menu_button("Despawn", |ui| {
-                    if ui.button("Despawn All Entities").clicked() {
+                    let despawn_all_button = Button::new("Despawn All Entities").ui(ui);
+                    if despawn_all_button.clicked() {
                         events.despawn_all.write(RequestDespawnSerializableEntities);
                         ui.close();
                     }
@@ -155,7 +163,8 @@ pub fn top_bar_ui(
 
                 ui.separator();
 
-                if ui.button("Open Default World").clicked() {
+                let open_default_world_button = Button::new("Open Default World").ui(ui);
+                if open_default_world_button.clicked() {
                     events.load.write(RequestLoadEvent(
                         editor_state.default_world.clone(),
                         SaveSettings::Runtime,
@@ -164,7 +173,8 @@ pub fn top_bar_ui(
                     ui.close();
                 }
 
-                if ui.button("Save Default World").clicked() {
+                let save_default_world_button = Button::new("Save Default World").ui(ui);
+                if save_default_world_button.clicked() {
                     events
                         .save
                         .write(RequestSaveEvent(editor_state.default_world.clone()));
@@ -173,7 +183,91 @@ pub fn top_bar_ui(
                 }
             });
 
-            ui.menu_button("Panels", |ui| {
+            ui.add_space(spacing);
+
+            ui.menu_button("Edit", |ui| {
+                ui.set_min_width(150.0);
+
+                let any_selected = !selection_query.is_empty();
+                let any_on_clipboard = false;
+
+                for (text, shortcut, event, enabled) in [
+                    ("Cut", "Ctrl + X", EntityEvents::Cut, any_selected),
+                    ("Copy", "Ctrl + C", EntityEvents::Copy, any_selected),
+                    ("Paste", "Ctrl + V", EntityEvents::Paste, any_on_clipboard),
+                    // @TODO disable if no active selected entity
+                    ("Deselect All", "U", EntityEvents::DeselectAll, any_selected),
+                ] {
+                    ui.add_enabled_ui(enabled, |ui| {
+                        let button = Button::new(text).shortcut_text(shortcut).ui(ui);
+                        if button.clicked() {
+                            commands.trigger(event);
+                        }
+                    });
+                }
+            });
+
+            ui.add_space(spacing);
+
+            ui.menu_button("View", |ui| {
+                ui.set_min_width(150.0);
+
+                let toggle_editor_button = Button::new("Toggle Editor").shortcut_text("F2").ui(ui);
+                if toggle_editor_button.clicked() {
+                    events.toggle_editor.write(RequestEditorToggle);
+                }
+
+                let toggle_camera_control_button = Button::new("Toggle Camera Control").shortcut_text("F3").ui(ui);
+                if toggle_camera_control_button.clicked() {
+                    events.toggle_cam_sync.write(RequestToggleCameraSync);
+                }
+
+                ui.separator();
+
+                ui.menu_button("Viewport Camera", |ui| {
+                    let using_editor = viewport_camera_state.is_using_editor();
+                    if ui
+                        .selectable_label(using_editor, "Editor Camera")
+                        .clicked()
+                        && !using_editor
+                    {
+                        events
+                            .viewport_camera
+                            .write(RequestViewportCameraOverride { camera: None });
+                        ui.close();
+                    }
+
+                    if camera_options.is_empty() {
+                        ui.label("No scene cameras targeting the primary window");
+                    } else {
+                        for (entity, label) in camera_options.iter() {
+                            let is_active =
+                                viewport_camera_state.active_override == Some(*entity);
+                            if ui.selectable_label(is_active, label).clicked() && !is_active {
+                                events.viewport_camera.write(RequestViewportCameraOverride {
+                                    camera: Some(*entity),
+                                });
+                                ui.close();
+                            }
+                        }
+                    }
+                });
+
+                ui.separator();
+
+                // @TODO disable if no active selected entity
+                let any_selected = !selection_query.is_empty();
+                ui.add_enabled_ui(any_selected, |ui| {
+                    let frame_active_button = Button::new("Frame Active").shortcut_text("F").ui(ui);
+                    if frame_active_button.clicked() {
+                            events.frame.write(RequestCameraEntityFrame);
+                        }
+                    });
+
+                ui.separator();
+
+                // @TODO Merge Side tab and Bottom tab into one enum and use a single loop to render them.
+
                 for (tab_type, label) in vec![
                     (SideTabType::EntityEditor, "Entity Editor"),
                     (SideTabType::NodeTree, "Entities"),
@@ -192,13 +286,12 @@ pub fn top_bar_ui(
                                 side_dock.dock_state.push_to_focused_leaf(tab);
                             }
                         }
-                        ui.close();
                     }
                 }
 
                 ui.separator();
 
-                for (tab_type, label) in vec![
+                for (tab_type, label) in [
                     (BottomTabType::Log, "Log"),
                     (BottomTabType::Debug, "Debug"),
                     (BottomTabType::Events, "Events"),
@@ -216,8 +309,21 @@ pub fn top_bar_ui(
                                 bottom_dock.dock_state.push_to_focused_leaf(tab);
                             }
                         }
-                        ui.close();
                     }
+                }
+            });
+
+            ui.add_space(spacing);
+
+            ui.menu_button("Help", |ui| {
+                ui.set_min_width(150.0);
+
+                let show_help_button = Button::new("Show Help").shortcut_text("F1").ui(ui);
+                if show_help_button.clicked() {
+                    events.popup.write(PopupMenuRequestedEvent {
+                        popup: PopupType::Help,
+                        mouse_pos: user_input.mouse_pos,
+                    });
                 }
             });
         });
@@ -227,76 +333,24 @@ pub fn top_bar_ui(
         // Buttons
         ui.horizontal(|ui| {
             ui.separator();
-            if ui.button("Add Entity (Shft + A) ").clicked() {
+            let add_entity_button = Button::new("Add Entity").shortcut_text("Shift + A").ui(ui);
+            if add_entity_button.clicked() {
                 events.popup.write(PopupMenuRequestedEvent {
                     popup: PopupType::AddEntity,
                     mouse_pos: user_input.mouse_pos,
                 });
             }
             ui.separator();
-            if ui.button("Parents (Shft + P) ").clicked() {
+            let parents_button = Button::new("Parents").shortcut_text("Shift + P").ui(ui);
+            if parents_button.clicked() {
                 events.popup.write(PopupMenuRequestedEvent {
                     popup: PopupType::AddRelationship,
                     mouse_pos: user_input.mouse_pos,
                 });
             }
-            ui.separator();
-            if ui.button("Show Help (F1) ").clicked() {
-                events.popup.write(PopupMenuRequestedEvent {
-                    popup: PopupType::Help,
-                    mouse_pos: user_input.mouse_pos,
-                });
-            }
-            ui.separator();
-            if ui.button("Toggle Editor (F2) ").clicked() {
-                events.toggle_editor.write(RequestEditorToggle);
-            }
-
-            ui.separator();
-            if ui.button("Toggle Camera Control (F3) ").clicked() {
-                events.toggle_cam_sync.write(RequestToggleCameraSync);
-            }
 
             ui.separator();
             ui.label(format!("Viewing: {}", active_camera_label));
-            ui.menu_button("Viewport Camera", |ui| {
-                let using_editor = viewport_camera_state.is_using_editor();
-                if ui
-                    .selectable_label(using_editor, "Editor Camera")
-                    .clicked()
-                    && !using_editor
-                {
-                    events
-                        .viewport_camera
-                        .write(RequestViewportCameraOverride { camera: None });
-                    ui.close();
-                }
-
-                if camera_options.is_empty() {
-                    ui.label("No scene cameras targeting the primary window");
-                } else {
-                    for (entity, label) in camera_options.iter() {
-                        let is_active =
-                            viewport_camera_state.active_override == Some(*entity);
-                        if ui.selectable_label(is_active, label).clicked() && !is_active {
-                            events.viewport_camera.write(RequestViewportCameraOverride {
-                                camera: Some(*entity),
-                            });
-                            ui.close();
-                        }
-                    }
-                }
-            });
-
-            ui.separator();
-            if ui.button("Frame Active (F) ").clicked() {
-                events.frame.write(RequestCameraEntityFrame);
-            }
-            ui.separator();
-            if ui.button("Deselect All (U) ").clicked() {
-                commands.trigger(EntityEvents::DeselectAll);
-            }
-            ui.separator();
         });
 
         ui.add_space(spacing);

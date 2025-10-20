@@ -14,12 +14,12 @@ use crate::{
 
 use bevy::{
     camera::{Camera, Camera3d, RenderTarget},
-    ecs::system::{Commands, Query},
+    ecs::{query::With, system::{Commands, Query}},
     prelude::{Entity, Name, Res, ResMut},
 };
 use bevy_egui::{egui, EguiContexts};
 use bevy_granite_core::{UICamera, UserInput};
-use bevy_granite_gizmos::GizmoCamera;
+use bevy_granite_gizmos::{GizmoCamera, Selected};
 use egui_dock::DockArea;
 use serde::{Deserialize, Serialize};
 
@@ -67,6 +67,7 @@ pub fn dock_ui_system(
         Option<&GizmoCamera>,
     )>,
     viewport_camera_state: Res<ViewportCameraState>,
+    selection_query: Query<Entity, With<Selected>>,
 ) {
     let mut camera_options: Vec<(Entity, String)> = camera_query
         .iter()
@@ -115,6 +116,7 @@ pub fn dock_ui_system(
                     &mut commands,
                     &camera_options,
                     viewport_camera_state.as_ref(),
+                    &selection_query,
                 );
             });
         });

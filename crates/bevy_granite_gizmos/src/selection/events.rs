@@ -10,6 +10,9 @@ pub enum EntityEvents {
     Deselect { target: Entity },
     DeselectRange { range: Vec<Entity> },
     DeselectAll,
+    Cut,
+    Copy,
+    Paste,
 }
 
 #[derive(Message)]

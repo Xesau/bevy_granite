@@ -128,6 +128,42 @@ fn handle_shortcuts(
         });
     }
 
+    // Ctrl+X
+    // Cut
+    if input.ctrl_left.pressed && input.key_x.just_pressed && !input.mouse_right.any {
+        log!(
+            LogType::Editor,
+            LogLevel::Info,
+            LogCategory::Input,
+            "(shortcut) Cutting selected entities"
+        );
+        commands.trigger(EntityEvents::Cut);
+    }
+
+    // Ctrl+C
+    // Copy
+    if input.ctrl_left.pressed && input.key_c.just_pressed && !input.mouse_right.any {
+        log!(
+            LogType::Editor,
+            LogLevel::Info,
+            LogCategory::Input,
+            "(shortcut) Copying selected entities"
+        );
+        commands.trigger(EntityEvents::Copy);
+    }
+
+    // Ctrl+V
+    // Paste
+    if input.ctrl_left.pressed && input.key_v.just_pressed && !input.mouse_right.any {
+        log!(
+            LogType::Editor,
+            LogLevel::Info,
+            LogCategory::Input,
+            "(shortcut) Pasting copied entities"
+        );
+        commands.trigger(EntityEvents::Paste);
+    }
+
     // F1
     // Help
     if input.key_f1.just_pressed && !input.mouse_over_egui && !input.mouse_right.any {

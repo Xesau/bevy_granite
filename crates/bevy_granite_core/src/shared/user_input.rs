@@ -39,6 +39,9 @@ pub struct UserInput {
     pub key_r: UserButtonState,
     pub key_f: UserButtonState,
     pub key_p: UserButtonState,
+    pub key_c: UserButtonState,
+    pub key_x: UserButtonState,
+    pub key_v: UserButtonState,
     pub key_delete: UserButtonState,
     pub key_space: UserButtonState,
 }
@@ -159,6 +162,9 @@ pub fn capture_input_events(
     let mut key_q = user_input.key_q;
     let mut key_z = user_input.key_z;
     let mut key_f = user_input.key_f;
+    let mut key_c = user_input.key_c;
+    let mut key_x = user_input.key_x;
+    let mut key_v = user_input.key_v;
     let mut key_space = user_input.key_space;
 
     // Update state
@@ -170,6 +176,9 @@ pub fn capture_input_events(
     alt_left.update_key(&keyboard_input, KeyCode::AltLeft, &mut user_input);
     key_w.update_key(&keyboard_input, KeyCode::KeyW, &mut user_input);
     key_p.update_key(&keyboard_input, KeyCode::KeyP, &mut user_input);
+    key_c.update_key(&keyboard_input, KeyCode::KeyC, &mut user_input);
+    key_x.update_key(&keyboard_input, KeyCode::KeyX, &mut user_input);
+    key_v.update_key(&keyboard_input, KeyCode::KeyV, &mut user_input);
     key_z.update_key(&keyboard_input, KeyCode::KeyZ, &mut user_input);
     key_delete.update_key(&keyboard_input, KeyCode::Delete, &mut user_input);
     #[cfg(target_os = "macos")]
@@ -212,6 +221,9 @@ pub fn capture_input_events(
     user_input.key_d = key_d;
     user_input.key_q = key_q;
     user_input.key_z = key_z;
+    user_input.key_c = key_c;
+    user_input.key_x = key_x;
+    user_input.key_v = key_v;
     user_input.key_space = key_space;
     user_input.alt_left = alt_left;
 

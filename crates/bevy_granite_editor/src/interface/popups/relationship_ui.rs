@@ -39,11 +39,11 @@ pub fn relationship_ui(
                     should_close = true;
                 }
 
-                if ui.button("Remove Parent").clicked() {
+                if ui.button("Uncouple Parent").clicked() {
                     events.remove_parent.write(RequestRemoveParents);
                     should_close = true;
                 }
-                if ui.button("Remove Children").clicked() {
+                if ui.button("Uncouple Children").clicked() {
                     events.remove_children.write(RequestRemoveChildren);
                     should_close = true;
                 }
